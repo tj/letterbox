@@ -23,6 +23,7 @@ func main() {
 	dir := flag.String("output", "processed", "Image output directory")
 	white := flag.Bool("white", false, "Output a white letterbox")
 	aspect := flag.String("aspect", "16:9", "Output aspect ratio")
+	quality := flag.Int("quality", 90, "Output jpeg quality")
 	concurrency := flag.Int("concurrency", runtime.NumCPU(), "Concurrency of image processing")
 	flag.Parse()
 
@@ -56,7 +57,7 @@ func main() {
 		path := path
 		sem.Run(func() {
 			log.Printf("Cropping %s\n", path)
-			err := convert(path, *dir, *white, ratio)
+			err := convert(path, *dir, *white, ratio, *quality)
 			if err != nil {
 				log.Fatalf("error converting %q: %s\n", path, err)
 			}
@@ -68,7 +69,7 @@ func main() {
 }
 
 // convert an image.
-func convert(path, dir string, white bool, ratio float64) error {
+func convert(path, dir string, white bool, ratio float64, quality int) error {
 	// open
 	f, err := os.Open(path)
 	if err != nil {
@@ -111,18 +112,18 @@ func convert(path, dir string, white bool, ratio float64) error {
 	draw.Draw(dst, dr, src, src.Bounds().Min, draw.Src)
 
 	// write
-	return write(dst, filepath.Join(dir, path))
+	return write(dst, filepath.Join(dir, path), quality)
 }
 
 // write image to path.
-func write(img image.Image, path string) error {
+func write(img image.Image, path string, quality int) error {
 	f, err := os.Create(path)
 	if err != nil {
 		return errors.Wrap(err, "creating")
 	}
 
 	err = jpeg.Encode(f, img, &jpeg.Options{
-		Quality: 90,
+		Quality: quality,
 	})
 
 	if err != nil {
