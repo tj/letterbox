@@ -5,6 +5,7 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
+	"image/jpeg"
 	"log"
 	"os"
 	"path/filepath"
@@ -13,11 +14,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tj/go-sync/semaphore"
-
 	"github.com/pkg/errors"
-
-	"image/jpeg"
+	"github.com/tj/go-sync/semaphore"
 )
 
 func main() {
