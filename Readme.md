@@ -27,7 +27,7 @@ Usage of letterbox:
 Example of 1:1
 
 ```
-$ letterbox -aspect 1:1 *.jpg
+$ letterbox -aspect 1:1
 ```
 
 ![](https://apex-software.imgix.net/github/tj/letterbox/1-1.jpg?w=500&dpr=2)
@@ -35,7 +35,7 @@ $ letterbox -aspect 1:1 *.jpg
 Example of 4:3
 
 ```
-$ letterbox -aspect 4:3 *.jpg
+$ letterbox -aspect 4:3
 ```
 
 ![](https://apex-software.imgix.net/github/tj/letterbox/4-3.jpg?w=500&dpr=2)
@@ -43,11 +43,18 @@ $ letterbox -aspect 4:3 *.jpg
 Example of 16:9 (the default)
 
 ```
-$ letterbox -aspect 16:9 *.jpg
+$ letterbox -aspect 16:9
 ```
 
 ![](https://apex-software.imgix.net/github/tj/letterbox/16-9.jpg?w=500&dpr=2)
 
+Example of explicitly listing images:
+
+```
+$ letterbox DSCF6719.jpg DSCF6718.jpg
+```
+
+![](https://apex-software.imgix.net/github/tj/letterbox/16-9.jpg?w=500&dpr=2)
 
 ---
 

@@ -6,6 +6,7 @@ import (
 	"image/color"
 	"image/draw"
 	"image/jpeg"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -37,7 +38,16 @@ func main() {
 		log.Fatalf("error parsing aspect ratio: %s", err)
 	}
 
+	// images explicitly passed, or inferred
 	images := flag.Args()
+	if len(images) == 0 {
+		images, err = listImages(".")
+		if err != nil {
+			log.Fatalf("error listing images: %s", err)
+		}
+	}
+
+	// process
 	sem := make(semaphore.Semaphore, *concurrency)
 	start := time.Now()
 
@@ -141,4 +151,21 @@ func parseAspect(s string) (float64, error) {
 	}
 
 	return b / a, nil
+}
+
+// listImages returns the images in the given directory.
+func listImages(dir string) (images []string, err error) {
+	files, err := ioutil.ReadDir(dir)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, f := range files {
+		ext := strings.ToLower(filepath.Ext(f.Name()))
+		if ext == ".jpg" || ext == ".jpeg" {
+			images = append(images, filepath.Join(dir, f.Name()))
+		}
+	}
+
+	return
 }
