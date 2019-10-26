@@ -24,6 +24,7 @@ func main() {
 	white := flag.Bool("white", false, "Output a white letterbox")
 	aspect := flag.String("aspect", "16:9", "Output aspect ratio")
 	concurrency := flag.Int("concurrency", runtime.NumCPU(), "Concurrency of image processing")
+	force := flag.Bool("force", false, "Force image reprocess when already exists")
 	flag.Parse()
 
 	// create destination directory
@@ -50,12 +51,19 @@ func main() {
 	// process
 	sem := make(semaphore.Semaphore, *concurrency)
 	start := time.Now()
+	total := len(images)
 
-	log.Printf("Processing %d images\n", len(images))
+	log.Printf("Processing %d images\n", total)
 	for _, path := range images {
 		path := path
 		sem.Run(func() {
 			log.Printf("Cropping %s\n", path)
+			// Check if the output file already exists and is not forced.
+			if err := skip(*dir, path); err != nil && !(*force) {
+				log.Printf("(!) Image %s was already processed: %s\n", path, err)
+				total = total - 1
+				return
+			}
 			err := convert(path, *dir, *white, ratio)
 			if err != nil {
 				log.Fatalf("error converting %q: %s\n", path, err)
@@ -64,7 +72,7 @@ func main() {
 	}
 
 	sem.Wait()
-	log.Printf("Processed %d images in %s\n", len(images), time.Since(start).Round(time.Second))
+	log.Printf("Processed %d images in %s\n", total, time.Since(start).Round(time.Second))
 }
 
 // convert an image.
@@ -168,4 +176,30 @@ func listImages(dir string) (images []string, err error) {
 	}
 
 	return
+}
+
+// skip returns true if the file already exists and the mtime is greater than
+// the source image, false otherwhise.
+func skip(dir, path string) error {
+	dest := filepath.Join(dir, path)
+	// fail fast if not exist.
+	fdest, err := os.Stat(dest)
+	if os.IsNotExist(err) {
+		return nil
+	}
+
+	// already exists.
+	if err == nil {
+		fsrc, e := os.Stat(path)
+		if e != nil {
+			return e
+		}
+		if fsrc.ModTime().Before(fdest.ModTime()) {
+			return errors.New("already exist")
+		}
+	}
+
+	// Schrodinger: file may or may not exist. permissions, disk errors...
+	// return the error
+	return err
 }
