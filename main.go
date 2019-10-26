@@ -178,8 +178,8 @@ func listImages(dir string) (images []string, err error) {
 	return
 }
 
-// skip returns true if the file already exists and the mtime is greater than
-// the source image, false otherwhise.
+// skip returns an error if the file already exists and the mtime is greater than
+// the source image or if something fails in the checks.
 func skip(dir, path string) error {
 	dest := filepath.Join(dir, path)
 	// fail fast if not exist.
