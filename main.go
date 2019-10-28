@@ -25,6 +25,7 @@ func main() {
 	aspect := flag.String("aspect", "16:9", "Output aspect ratio")
 	quality := flag.Int("quality", 90, "Output jpeg quality")
 	concurrency := flag.Int("concurrency", runtime.NumCPU(), "Concurrency of image processing")
+	force := flag.Bool("force", false, "Force image reprocess when it exists")
 	flag.Parse()
 
 	// create destination directory
@@ -50,14 +51,14 @@ func main() {
 
 	// process
 	sem := make(semaphore.Semaphore, *concurrency)
+	total := len(images)
 	start := time.Now()
 
-	log.Printf("Processing %d images\n", len(images))
+	log.Printf("Processing %d images\n", total)
 	for _, path := range images {
 		path := path
 		sem.Run(func() {
-			log.Printf("Cropping %s\n", path)
-			err := convert(path, *dir, *white, ratio, *quality)
+			err := convert(path, *dir, *white, ratio, *quality, *force)
 			if err != nil {
 				log.Fatalf("error converting %q: %s\n", path, err)
 			}
@@ -65,12 +66,21 @@ func main() {
 	}
 
 	sem.Wait()
-	log.Printf("Processed %d images in %s\n", len(images), time.Since(start).Round(time.Second))
+	log.Printf("Processed %d images in %s\n", total, time.Since(start).Round(time.Second))
 }
 
 // convert an image.
-func convert(path, dir string, white bool, ratio float64, quality int) error {
+func convert(path, dir string, white bool, ratio float64, quality int, force bool) error {
+	dstpath := filepath.Join(dir, path)
+
+	// skip
+	if !force && unmodified(path, dstpath) {
+		log.Printf("Skipping %s (exists)", path)
+		return nil
+	}
+
 	// open
+	log.Printf("Processing %s\n", path)
 	f, err := os.Open(path)
 	if err != nil {
 		return errors.Wrap(err, "opening")
@@ -112,7 +122,7 @@ func convert(path, dir string, white bool, ratio float64, quality int) error {
 	draw.Draw(dst, dr, src, src.Bounds().Min, draw.Src)
 
 	// write
-	return write(dst, filepath.Join(dir, path), quality)
+	return write(dst, dstpath, quality)
 }
 
 // write image to path.
@@ -169,4 +179,28 @@ func listImages(dir string) (images []string, err error) {
 	}
 
 	return
+}
+
+// unmodified returns true if the output image already exists,
+// and is newer than the source image. Errors are treated
+// as falsey.
+func unmodified(src, dst string) bool {
+	di, err := os.Stat(dst)
+
+	// doesn't exist
+	if os.IsNotExist(err) {
+		return false
+	}
+
+	// exists, compare modified times
+	si, err := os.Stat(src)
+	if err != nil {
+		return false
+	}
+
+	if di.ModTime().After(si.ModTime()) {
+		return true
+	}
+
+	return false
 }
