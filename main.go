@@ -24,7 +24,7 @@ func main() {
 	white := flag.Bool("white", false, "Output a white letterbox")
 	aspect := flag.String("aspect", "16:9", "Output aspect ratio")
 	concurrency := flag.Int("concurrency", runtime.NumCPU(), "Concurrency of image processing")
-	force := flag.Bool("force", false, "Force image reprocess when already exists")
+	force := flag.Bool("force", false, "Force image reprocess when it exists")
 	flag.Parse()
 
 	// create destination directory
@@ -50,21 +50,14 @@ func main() {
 
 	// process
 	sem := make(semaphore.Semaphore, *concurrency)
-	start := time.Now()
 	total := len(images)
+	start := time.Now()
 
 	log.Printf("Processing %d images\n", total)
 	for _, path := range images {
 		path := path
 		sem.Run(func() {
-			log.Printf("Cropping %s\n", path)
-			// Check if the output file already exists and is not forced.
-			if err := skip(*dir, path); err != nil && !(*force) {
-				log.Printf("(!) Image %s was already processed: %s\n", path, err)
-				total = total - 1
-				return
-			}
-			err := convert(path, *dir, *white, ratio)
+			err := convert(path, *dir, *white, ratio, *force)
 			if err != nil {
 				log.Fatalf("error converting %q: %s\n", path, err)
 			}
@@ -76,8 +69,17 @@ func main() {
 }
 
 // convert an image.
-func convert(path, dir string, white bool, ratio float64) error {
+func convert(path, dir string, white bool, ratio float64, force bool) error {
+	dstpath := filepath.Join(dir, path)
+
+	// skip
+	if !force && unmodified(path, dstpath) {
+		log.Printf("Skipping %s (exists)", path)
+		return nil
+	}
+
 	// open
+	log.Printf("Processing %s\n", path)
 	f, err := os.Open(path)
 	if err != nil {
 		return errors.Wrap(err, "opening")
@@ -119,7 +121,7 @@ func convert(path, dir string, white bool, ratio float64) error {
 	draw.Draw(dst, dr, src, src.Bounds().Min, draw.Src)
 
 	// write
-	return write(dst, filepath.Join(dir, path))
+	return write(dst, dstpath)
 }
 
 // write image to path.
@@ -178,28 +180,26 @@ func listImages(dir string) (images []string, err error) {
 	return
 }
 
-// skip returns an error if the file already exists and the mtime is greater than
-// the source image or if something fails in the checks.
-func skip(dir, path string) error {
-	dest := filepath.Join(dir, path)
-	// fail fast if not exist.
-	fdest, err := os.Stat(dest)
+// unmodified returns true if the output image already exists,
+// and is newer than the source image. Errors are treated
+// as falsey.
+func unmodified(src, dst string) bool {
+	di, err := os.Stat(dst)
+
+	// doesn't exist
 	if os.IsNotExist(err) {
-		return nil
+		return false
 	}
 
-	// already exists.
-	if err == nil {
-		fsrc, e := os.Stat(path)
-		if e != nil {
-			return e
-		}
-		if fsrc.ModTime().Before(fdest.ModTime()) {
-			return errors.New("already exist")
-		}
+	// exists, compare modified times
+	si, err := os.Stat(src)
+	if err != nil {
+		return false
 	}
 
-	// Schrodinger: file may or may not exist. permissions, disk errors...
-	// return the error
-	return err
+	if di.ModTime().After(si.ModTime()) {
+		return true
+	}
+
+	return false
 }
