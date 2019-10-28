@@ -2,6 +2,7 @@ package letterbox
 
 import (
 	"context"
+	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
@@ -12,7 +13,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/sync/semaphore"
 )
@@ -115,14 +115,14 @@ func (p *Processor) process(path string) error {
 	log.Printf("Processing %s\n", path)
 	f, err := os.Open(path)
 	if err != nil {
-		return errors.Wrap(err, "opening")
+		return fmt.Errorf("opening: %w", err)
 	}
 	defer f.Close()
 
 	// decode
 	src, _, err := image.Decode(f)
 	if err != nil {
-		return errors.Wrap(err, "decoding")
+		return fmt.Errorf("decoding: %w", err)
 	}
 
 	// dimensions
@@ -161,7 +161,7 @@ func (p *Processor) process(path string) error {
 func writeImage(img image.Image, path string, quality int) error {
 	f, err := os.Create(path)
 	if err != nil {
-		return errors.Wrap(err, "creating")
+		return fmt.Errorf("creating: %w", err)
 	}
 
 	err = jpeg.Encode(f, img, &jpeg.Options{
@@ -169,7 +169,7 @@ func writeImage(img image.Image, path string, quality int) error {
 	})
 
 	if err != nil {
-		return errors.Wrap(err, "encoding")
+		return fmt.Errorf("encoding: %w", err)
 	}
 
 	return nil
