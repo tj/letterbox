@@ -60,7 +60,7 @@ func main() {
 		log.Fatalf("error processing: %s", err)
 	}
 
-	log.Printf("Processed %d images in %s\n", len(images), time.Since(start).Round(time.Second))
+	log.Printf("Processed in %s\n", time.Since(start).Round(time.Second))
 }
 
 // listImages returns the images in the given directory.
