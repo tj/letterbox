@@ -5,7 +5,7 @@ A tiny Go program to batch-process letter-boxing of photographs.
 ## Installation
 
 ```
-$ go get github.com/tj/letterbox
+$ go get github.com/tj/letterbox/cmd/letterbox
 ```
 
 ## Usage
