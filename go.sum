@@ -2,3 +2,5 @@ github.com/pkg/errors v0.8.1 h1:iURUrRGxPUNPdy5/HRSm+Yj6okJ6UtLINN0Q9M4+h3I=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/tj/go-sync v0.0.0-20180508175702-e26b219dec0f h1:MCMb17tpDFaL5c+m6Kgx8AVubfPnS0Pm2GfbjLCjaBg=
 github.com/tj/go-sync v0.0.0-20180508175702-e26b219dec0f/go.mod h1:Yc1ubQWqgwxY/yM0yekxzBPuxtZg4hDgWa2OjlKpi8M=
+golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e h1:vcxGaoTs7kV8m5Np9uUNQin4BrLOthgV7252N8V+FwY=
+golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
