@@ -16,8 +16,12 @@ Usage of letterbox:
     	Output aspect ratio (default "16:9")
   -concurrency int
     	Concurrency of image processing (default 8)
+  -force
+    	Force image reprocess when it exists
   -output string
     	Image output directory (default "processed")
+  -quality int
+    	Output jpeg quality (default 90)
   -white
     	Output a white letterbox
 ```
