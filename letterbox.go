@@ -56,7 +56,7 @@ func WithWhiteBackground(v bool) Option {
 // WithForce changes whether or not to force re-processing of existing images.
 func WithForce(v bool) Option {
 	return func(p *Processor) error {
-		p.white = v
+		p.force = v
 		return nil
 	}
 }
