@@ -28,6 +28,7 @@ type Processor struct {
 	aspect      float64
 	quality     int
 	concurrency int
+	padding     float64
 	force       bool
 }
 
@@ -57,6 +58,14 @@ func WithWhiteBackground(v bool) Option {
 func WithForce(v bool) Option {
 	return func(p *Processor) error {
 		p.force = v
+		return nil
+	}
+}
+
+// WithPadding changes the image padding which is applied as a percentage.
+func WithPadding(n int) Option {
+	return func(p *Processor) error {
+		p.padding = float64(n) / 100
 		return nil
 	}
 }
@@ -133,34 +142,65 @@ func (p *Processor) process(path string) error {
 
 	// dimensions
 	sb := src.Bounds()
-	sw := sb.Max.X
-	sh := sb.Max.Y
-	dw := sw
-	dh := int(float64(dw) * p.aspect)
-
-	// new image
-	dst := image.NewRGBA(image.Rect(0, 0, dw, dh))
-	db := dst.Bounds()
-
-	// dst rect
-	dr := image.Rect(
-		dw/2-(sw/2),
-		dh/2-(sh/2),
-		dw/2+dw,
-		dh/2+sh)
-
-	// color
-	bg := color.Black
-	if p.white {
-		bg = color.White
-	}
+	db := aspect(sb, p.aspect)
+	db = padding(sb, p.padding)
+	dr := centered(sb, db)
 
 	// draw
-	draw.Draw(dst, db, &image.Uniform{bg}, image.ZP, draw.Src)
+	dst := image.NewRGBA(db)
+	draw.Draw(dst, db, &image.Uniform{withColor(p.white)}, image.ZP, draw.Src)
 	draw.Draw(dst, dr, src, src.Bounds().Min, draw.Src)
 
 	// write
 	return writeImage(dst, dstpath, p.quality)
+}
+
+// withColor returns the color specified.
+func withColor(white bool) color.Color {
+	if white {
+		return color.White
+	}
+	return color.Black
+}
+
+// centered returns a rect with rect s centered in rect d.
+func centered(s, d image.Rectangle) image.Rectangle {
+	sw := s.Max.X
+	sh := s.Max.Y
+	dw := d.Max.X
+	dh := d.Max.Y
+	return image.Rect(
+		dw/2-(sw/2),
+		dh/2-(sh/2),
+		dw/2+dw,
+		dh/2+sh)
+}
+
+// padding returns a rect with padding applied.
+func padding(r image.Rectangle, padding float64) image.Rectangle {
+	w := float64(r.Max.X)
+	h := float64(r.Max.Y)
+	return image.Rect(
+		r.Min.X,
+		r.Min.Y,
+		int(w+(w*padding)),
+		int(h+(h+padding)))
+}
+
+// aspect returns a rect with aspect ratio applied.
+func aspect(r image.Rectangle, aspect float64) image.Rectangle {
+	// TODO: support portrait orientation
+	sw := float64(r.Max.X)
+	sh := float64(r.Max.Y)
+	sa := sw / sh
+	d := 1 + (sa - aspect)
+	dw := sw
+	dh := sh * d
+	return image.Rect(
+		r.Min.X,
+		r.Min.Y,
+		int(dw),
+		int(dh))
 }
 
 // writeImage writes a jpeg image to the given path.
@@ -195,11 +235,7 @@ func parseAspect(s string) (float64, error) {
 		return 0, err
 	}
 
-	if b > a {
-		a, b = b, a
-	}
-
-	return b / a, nil
+	return a / b, nil
 }
 
 // unmodified returns true if the output image already exists,

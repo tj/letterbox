@@ -19,6 +19,7 @@ func main() {
 	white := flag.Bool("white", false, "Output a white letterbox")
 	aspect := flag.String("aspect", "16:9", "Output aspect ratio")
 	quality := flag.Int("quality", 90, "Output jpeg quality")
+	padding := flag.Int("padding", 0, "Output image padding in percentage")
 	concurrency := flag.Int("concurrency", runtime.NumCPU(), "Concurrency of image processing")
 	force := flag.Bool("force", false, "Force image reprocess when it exists")
 	flag.Parse()
@@ -48,6 +49,7 @@ func main() {
 		letterbox.WithQuality(*quality),
 		letterbox.WithForce(*force),
 		letterbox.WithAspect(*aspect),
+		letterbox.WithPadding(*padding),
 	)
 
 	if err != nil {

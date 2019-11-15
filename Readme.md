@@ -20,6 +20,8 @@ Usage of letterbox:
     	Force image reprocess when it exists
   -output string
     	Image output directory (default "processed")
+  -padding int
+    	Output image padding in percentage
   -quality int
     	Output jpeg quality (default 90)
   -white
