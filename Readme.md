@@ -62,6 +62,14 @@ $ letterbox DSCF6719.jpg DSCF6718.jpg
 
 ![](https://apex-software.imgix.net/github/tj/letterbox/16-9.jpg?w=500&dpr=2)
 
+Example of 1:1 with a white background and 6% padding:
+
+```
+$ letterbox -white -aspect 1:1 -padding 6
+```
+
+![](https://apex-software.imgix.net/github/tj/letterbox/1-1-white.jpg?w=500&dpr=2)
+
 ---
 
 [![GoDoc](https://godoc.org/github.com/tj/letterbox?status.svg)](https://godoc.org/github.com/tj/letterbox)
