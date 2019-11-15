@@ -111,6 +111,12 @@ func (p *Processor) Process(ctx context.Context, images []string) error {
 func (p *Processor) process(path string) error {
 	dstpath := filepath.Join(p.dir, path)
 
+	// unmodified
+	if unmodified(path, dstpath) && !p.force {
+		log.Printf("Umodified %s", path)
+		return nil
+	}
+
 	// open
 	log.Printf("Processing %s\n", path)
 	f, err := os.Open(path)
