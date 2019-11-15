@@ -146,9 +146,13 @@ func (p *Processor) process(path string) error {
 	db = padding(sb, p.padding)
 	dr := centered(sb, db)
 
-	// draw
+	// dst image
 	dst := image.NewRGBA(db)
+
+	// fill the background with black or white
 	draw.Draw(dst, db, &image.Uniform{withColor(p.white)}, image.ZP, draw.Src)
+
+	// draw the src image onto dst
 	draw.Draw(dst, dr, src, src.Bounds().Min, draw.Src)
 
 	// write
