@@ -143,7 +143,7 @@ func (p *Processor) process(path string) error {
 	// dimensions
 	sb := src.Bounds()
 	db := aspect(sb, p.aspect)
-	db = padding(sb, p.padding)
+	db = padding(db, p.padding)
 	dr := centered(sb, db)
 
 	// dst image
@@ -188,7 +188,7 @@ func padding(r image.Rectangle, padding float64) image.Rectangle {
 		r.Min.X,
 		r.Min.Y,
 		int(w+(w*padding)),
-		int(h+(h+padding)))
+		int(h+(h*padding)))
 }
 
 // aspect returns a rect with aspect ratio applied.
