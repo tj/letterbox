@@ -184,27 +184,21 @@ func centered(s, d image.Rectangle) image.Rectangle {
 func padding(r image.Rectangle, padding float64) image.Rectangle {
 	w := float64(r.Max.X)
 	h := float64(r.Max.Y)
-	return image.Rect(
-		r.Min.X,
-		r.Min.Y,
-		int(w+(w*padding)),
-		int(h+(h*padding)))
+	return image.Rect(0, 0, int(w+(w*padding)), int(h+(h*padding)))
 }
 
 // aspect returns a rect with aspect ratio applied.
 func aspect(r image.Rectangle, aspect float64) image.Rectangle {
-	// TODO: support portrait orientation
-	sw := float64(r.Max.X)
-	sh := float64(r.Max.Y)
-	sa := sw / sh
-	d := 1 + (sa - aspect)
-	dw := sw
-	dh := sh * d
-	return image.Rect(
-		r.Min.X,
-		r.Min.Y,
-		int(dw),
-		int(dh))
+	w := float64(r.Max.X)
+	h := float64(r.Max.Y)
+
+	if w > h {
+		h = w / aspect
+	} else {
+		w = h * aspect
+	}
+
+	return image.Rect(0, 0, int(w), int(h))
 }
 
 // writeImage writes a jpeg image to the given path.
