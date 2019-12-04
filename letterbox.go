@@ -122,7 +122,7 @@ func (p *Processor) process(path string) error {
 
 	// unmodified
 	if unmodified(path, dstpath) && !p.force {
-		log.Printf("Umodified %s", path)
+		log.Printf("Unmodified %s", path)
 		return nil
 	}
 
