@@ -4,6 +4,14 @@ A tiny Go program to batch-process letter-boxing of photographs.
 
 ## Installation
 
+From [gobinaries.com](https://gobinaries.com):
+
+```sh
+$ curl -sf https://gobinaries.com/tj/letterbox/cmd/letterbox | sh
+```
+
+From source:
+
 ```
 $ go get github.com/tj/letterbox/cmd/letterbox
 ```
