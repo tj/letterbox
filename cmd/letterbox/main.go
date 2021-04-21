@@ -74,7 +74,7 @@ func listImages(dir string) (images []string, err error) {
 
 	for _, f := range files {
 		ext := strings.ToLower(filepath.Ext(f.Name()))
-		if ext == ".jpg" || ext == ".jpeg" {
+		if ext == ".jpg" || ext == ".jpeg" || ext == ".tif" {
 			images = append(images, filepath.Join(dir, f.Name()))
 		}
 	}

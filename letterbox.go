@@ -13,6 +13,8 @@ import (
 	"strconv"
 	"strings"
 
+	_ "golang.org/x/image/tiff"
+
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/sync/semaphore"
 )
